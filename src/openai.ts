@@ -1,16 +1,87 @@
 import { OPENAI_API_KEY, OPENAI_BASE_URL } from "./config.ts";
 
-const res = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${OPENAI_API_KEY}`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Say this is a test!" }],
-    temperature: 0.7,
-  }),
-});
-const body = await res.json();
-console.log(body);
+type RequestEndpoint = `/${string}`;
+
+enum RequestMethod {
+  Delete = "DELETE",
+  Get = "GET",
+  Post = "POST",
+}
+
+type RequestInput =
+  | {
+      endpoint: RequestEndpoint;
+      method: RequestMethod.Delete | RequestMethod.Get;
+      data?: never;
+    }
+  | {
+      endpoint: RequestEndpoint;
+      method: RequestMethod.Post;
+      data?: Record<string, unknown>;
+    };
+
+async function request<Response>({
+  endpoint,
+  method,
+  data,
+}: RequestInput): Promise<Response> {
+  try {
+    const response = await fetch(`${OPENAI_BASE_URL}${endpoint}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      ...(data && { body: JSON.stringify(data) }),
+    });
+    return await response.json();
+  } catch (err) {
+    // TODO: Proper error handling.
+    if (err instanceof Error) {
+      console.error(`Error with OpenAI API request: ${err.message}`);
+    }
+
+    throw err;
+  }
+}
+
+export enum ChatCompletionMessageRole {
+  Assistant = "assistant",
+  System = "system",
+  User = "user",
+}
+
+export interface ChatCompletionMessage {
+  role: ChatCompletionMessageRole;
+  content?: string;
+}
+
+export interface CreateChatCompletionRequest {
+  model: string;
+  messages: ChatCompletionMessage[];
+  temperature?: number;
+}
+
+export interface CreateChatCompletionResponseChoice {
+  message?: ChatCompletionMessage;
+}
+
+export interface CreateChatCompletionResponse {
+  choices: CreateChatCompletionResponseChoice[];
+}
+
+export async function createChatCompletion({
+  model,
+  messages,
+  temperature,
+}: CreateChatCompletionRequest): Promise<CreateChatCompletionResponse> {
+  return await request<CreateChatCompletionResponse>({
+    endpoint: "/chat/completions",
+    method: RequestMethod.Post,
+    data: {
+      model,
+      messages,
+      temperature,
+    },
+  });
+}
