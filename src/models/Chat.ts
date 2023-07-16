@@ -13,21 +13,17 @@ export interface Message {
 }
 
 export class Chat {
-  #conversation: Message[] = [];
-
-  get conversation(): Message[] {
-    return this.#conversation;
-  }
+  #messages: Message[] = [];
 
   async sendMessage(userMessage: string): Promise<string> {
-    this.#conversation.push({
+    this.#messages.push({
       content: userMessage,
       timestamp: Date.now(),
     });
 
     const response = await createChatCompletion({
       model: MODEL,
-      messages: this.#buildMessages(),
+      messages: this.#buildChatCompletionMessages(),
       temperature: 0.5,
     });
 
@@ -37,7 +33,7 @@ export class Chat {
       throw new Error("No assistant message found.");
     }
 
-    this.#conversation.push({
+    this.#messages.push({
       content: assistantMessage,
       timestamp: Date.now(),
     });
@@ -45,10 +41,10 @@ export class Chat {
     return assistantMessage;
   }
 
-  #buildMessages() {
+  #buildChatCompletionMessages() {
     return [
       { role: ChatCompletionMessageRole.System, content: ASSISTANT_BEHAVIOR },
-      ...this.#conversation.map((message, index) => ({
+      ...this.#messages.map((message, index) => ({
         role:
           index % 2 === 0
             ? ChatCompletionMessageRole.User
