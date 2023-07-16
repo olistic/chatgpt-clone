@@ -1,91 +1,55 @@
-import { OPENAI_API_KEY, OPENAI_BASE_URL } from "../config.ts";
+import type {
+  ChatCompletionRequestMessage,
+  CreateChatCompletionRequest,
+  CreateChatCompletionResponse,
+} from "openai";
+import {
+  ChatCompletionRequestMessageRoleEnum,
+  Configuration,
+  OpenAIApi,
+} from "openai";
 
-type RequestEndpoint = `/${string}`;
+import { OPENAI_API_KEY } from "../config.ts";
 
-enum RequestMethod {
-  Delete = "DELETE",
-  Get = "GET",
-  Post = "POST",
-}
+const configuration = new Configuration({
+  apiKey: OPENAI_API_KEY,
+});
 
-type RequestInput =
-  | {
-      endpoint: RequestEndpoint;
-      method: RequestMethod.Delete | RequestMethod.Get;
-      data?: never;
-    }
-  | {
-      endpoint: RequestEndpoint;
-      method: RequestMethod.Post;
-      data?: Record<string, unknown>;
-    };
+const openAI = new OpenAIApi(configuration);
 
-async function request<Response>({
-  endpoint,
-  method,
-  data,
-}: RequestInput): Promise<Response> {
-  if (!OPENAI_API_KEY) {
-    throw new Error("No OpenAI API key provided.");
-  }
-
-  try {
-    const response = await fetch(`${OPENAI_BASE_URL}${endpoint}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      ...(data && { body: JSON.stringify(data) }),
-    });
-    return await response.json();
-  } catch (err) {
-    // TODO: Proper error handling.
-    if (err instanceof Error) {
-      console.error(`Error with OpenAI API request: ${err.message}`);
-    }
-
-    throw err;
-  }
-}
-
-export enum ChatCompletionMessageRole {
-  Assistant = "assistant",
-  System = "system",
-  User = "user",
-}
-
-export interface ChatCompletionMessage {
-  role: ChatCompletionMessageRole;
-  content?: string;
-}
-
-export interface CreateChatCompletionRequest {
-  model: string;
-  messages: ChatCompletionMessage[];
-  temperature?: number;
-}
-
-export interface CreateChatCompletionResponseChoice {
-  message?: ChatCompletionMessage;
-}
-
-export interface CreateChatCompletionResponse {
-  choices: CreateChatCompletionResponseChoice[];
+export function buildChatCompletionMessages(
+  messages: string[]
+): ChatCompletionRequestMessage[] {
+  return [
+    { role: ChatCompletionRequestMessageRoleEnum.System, content: messages[0] },
+    ...messages.slice(1).map((message, index) => ({
+      role:
+        index % 2 === 0
+          ? ChatCompletionRequestMessageRoleEnum.User
+          : ChatCompletionRequestMessageRoleEnum.Assistant,
+      content: message,
+    })),
+  ];
 }
 
 export async function createChatCompletion({
   model,
   messages,
-  temperature,
 }: CreateChatCompletionRequest): Promise<CreateChatCompletionResponse> {
-  return await request<CreateChatCompletionResponse>({
-    endpoint: "/chat/completions",
-    method: RequestMethod.Post,
-    data: {
+  try {
+    const { data } = await openAI.createChatCompletion({
       model,
       messages,
-      temperature,
-    },
-  });
+    });
+    return data;
+  } catch (err) {
+    // TODO: Proper error handling.
+    if (err.response) {
+      console.error(err.response.status, err.response.data);
+    } else {
+      console.error(`Error with OpenAI API request: ${err.message}`);
+    }
+
+    throw err;
+  }
 }

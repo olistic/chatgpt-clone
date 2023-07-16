@@ -1,5 +1,5 @@
 import {
-  ChatCompletionMessageRole,
+  buildChatCompletionMessages,
   createChatCompletion,
 } from "../clients/openai.ts";
 
@@ -23,8 +23,10 @@ export class Chat {
 
     const response = await createChatCompletion({
       model: MODEL,
-      messages: this.#buildChatCompletionMessages(),
-      temperature: 0.5,
+      messages: buildChatCompletionMessages([
+        ASSISTANT_BEHAVIOR,
+        ...this.#messages.map(({ content }) => content),
+      ]),
     });
 
     const assistantMessage = response.choices[0].message?.content;
@@ -39,18 +41,5 @@ export class Chat {
     });
 
     return assistantMessage;
-  }
-
-  #buildChatCompletionMessages() {
-    return [
-      { role: ChatCompletionMessageRole.System, content: ASSISTANT_BEHAVIOR },
-      ...this.#messages.map((message, index) => ({
-        role:
-          index % 2 === 0
-            ? ChatCompletionMessageRole.User
-            : ChatCompletionMessageRole.Assistant,
-        content: message.content,
-      })),
-    ];
   }
 }

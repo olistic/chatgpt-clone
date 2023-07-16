@@ -1,6 +1,7 @@
 {
   "imports": {
     "ask": "https://deno.land/x/ask@1.0.6/mod.ts",
-    "dotenv": "https://deno.land/std@0.194.0/dotenv/mod.ts"
+    "dotenv": "https://deno.land/std@0.194.0/dotenv/mod.ts",
+    "openai": "npm:openai@^3.3.0"
   }
 }
