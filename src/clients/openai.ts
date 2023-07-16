@@ -25,6 +25,10 @@ async function request<Response>({
   method,
   data,
 }: RequestInput): Promise<Response> {
+  if (!OPENAI_API_KEY) {
+    throw new Error("No OpenAI API key provided.");
+  }
+
   try {
     const response = await fetch(`${OPENAI_BASE_URL}${endpoint}`, {
       method,
