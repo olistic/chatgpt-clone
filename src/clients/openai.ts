@@ -1,4 +1,4 @@
-import { OPENAI_API_KEY, OPENAI_BASE_URL } from "./config.ts";
+import { OPENAI_API_KEY, OPENAI_BASE_URL } from "../config.ts";
 
 type RequestEndpoint = `/${string}`;
 
