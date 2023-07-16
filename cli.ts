@@ -9,13 +9,13 @@ console.log("Welcome to ChatGPT!");
 const chat = new Chat();
 
 const ask = new Ask({
-  prefix: ">",
+  prefix: "",
 });
 
 while (true) {
   const { prompt } = await ask.input({
     name: "prompt",
-    message: "",
+    message: ">",
   });
 
   if (!prompt) {
