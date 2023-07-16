@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run --allow-env --allow-net --allow-read
 
-import Ask from "https://deno.land/x/ask@1.0.6/mod.ts";
+import Ask from "ask";
 
 import { Chat } from "./src/models/Chat.ts";
 
