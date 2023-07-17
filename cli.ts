@@ -1,12 +1,13 @@
 #!/usr/bin/env -S deno run --allow-env --allow-net --allow-read
 
 import Ask from "ask";
+import { bold, dim, red } from "color";
 
 import { OPENAI_API_KEY } from "/config.ts";
 import { Chat } from "~/models/Chat.ts";
 
 async function main() {
-  console.log("Welcome to ChatGPT!");
+  console.log(`${dim("---")} ${bold("ChatGPT")} ${dim("---")}`);
 
   if (!OPENAI_API_KEY) {
     throw new Error(
@@ -41,7 +42,7 @@ if (import.meta.main) {
     await main();
   } catch (err) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(red(err.message));
     }
 
     Deno.exit(1);
