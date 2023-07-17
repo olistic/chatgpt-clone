@@ -9,7 +9,9 @@ async function main() {
   console.log("Welcome to ChatGPT!");
 
   if (!OPENAI_API_KEY) {
-    throw new Error("No OpenAI API key provided.");
+    throw new Error(
+      "An OpenAI API key is required. Please see README.md for instructions."
+    );
   }
 
   const chat = new Chat();
@@ -25,7 +27,7 @@ async function main() {
     });
 
     if (!prompt) {
-      throw new Error("No prompt provided.");
+      continue;
     }
 
     const response = await chat.sendMessage(prompt);
