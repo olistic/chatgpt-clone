@@ -2,8 +2,8 @@
 
 import Ask from "ask";
 
-import { Chat } from "./src/models/Chat.ts";
-import { OPENAI_API_KEY } from "./src/config.ts";
+import { OPENAI_API_KEY } from "/config.ts";
+import { Chat } from "~/models/Chat.ts";
 
 async function main() {
   console.log("Welcome to ChatGPT!");

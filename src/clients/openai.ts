@@ -9,7 +9,7 @@ import {
   OpenAIApi,
 } from "openai";
 
-import { OPENAI_API_KEY } from "../config.ts";
+import { OPENAI_API_KEY } from "/config.ts";
 
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,

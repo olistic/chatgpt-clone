@@ -1,7 +1,7 @@
 import {
   buildChatCompletionMessages,
   createChatCompletion,
-} from "../clients/openai.ts";
+} from "~/clients/openai.ts";
 
 const MODEL = "gpt-3.5-turbo";
 
